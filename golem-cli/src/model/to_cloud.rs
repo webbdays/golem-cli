@@ -77,28 +77,67 @@ impl ToCloud<golem_cloud_client::model::DynamicLinking> for golem_client::model:
                 .map(|(key, oss_instance)| {
                     (
                         key.clone(),
-                        golem_cloud_client::model::DynamicLinkedInstance::WasmRpc(
-                            golem_cloud_client::model::DynamicLinkedWasmRpc {
-                                targets: match oss_instance {
-                                    golem_client::model::DynamicLinkedInstance::WasmRpc(rpc) => rpc
-                                        .targets
-                                        .iter()
-                                        .map(|(name, target)| {
-                                            (
-                                                name.clone(),
-                                                golem_cloud_client::model::WasmRpcTarget {
-                                                    interface_name: target.interface_name.clone(),
-                                                    component_name: target.component_name.clone(),
-                                                    component_type: target
-                                                        .component_type
-                                                        .to_cloud(),
-                                                },
-                                            )
-                                        })
-                                        .collect(),
-                                },
-                            },
-                        ),
+                        match oss_instance {
+                            golem_client::model::DynamicLinkedInstance::WasmRpc(rpc) => {
+                                golem_cloud_client::model::DynamicLinkedInstance::WasmRpc(
+                                    golem_cloud_client::model::DynamicLinkedWasmRpc {
+                                        targets: rpc
+                                            .targets
+                                            .iter()
+                                            .map(|(name, target)| {
+                                                (
+                                                    name.clone(),
+                                                    golem_cloud_client::model::WasmRpcTarget {
+                                                        interface_name: target
+                                                            .interface_name
+                                                            .clone(),
+                                                        component_name: target
+                                                            .component_name
+                                                            .clone(),
+                                                        component_type: target
+                                                            .component_type
+                                                            .to_cloud(),
+                                                    },
+                                                )
+                                            })
+                                            .collect(),
+                                    },
+                                )
+                            }
+                            golem_client::model::DynamicLinkedInstance::Grpc(rpc) => {
+                                golem_cloud_client::model::DynamicLinkedInstance::Grpc(
+                                    golem_cloud_client::model::DynamicLinkedGrpc {
+                                        targets: rpc
+                                            .targets
+                                            .iter()
+                                            .map(|(name, target)| {
+                                                (
+                                                    name.clone(),
+                                                    golem_cloud_client::model::GrpcTarget {
+                                                        interface_name: target
+                                                            .interface_name
+                                                            .clone(),
+                                                        component_name: target
+                                                            .component_name
+                                                            .clone(),
+                                                        component_type: target
+                                                            .component_type
+                                                            .to_cloud(),
+                                                    },
+                                                )
+                                            })
+                                            .collect(),
+                                        metadata: golem_cloud_client::model::GrpcMetadata {
+                                            file_descriptor_set: rpc
+                                                .metadata
+                                                .file_descriptor_set
+                                                .clone(),
+                                            package_name: rpc.metadata.package_name.clone(),
+                                        },
+                                    },
+                                )
+                            }
+                        },
                     )
                 })
                 .collect::<HashMap<_, _>>(),
