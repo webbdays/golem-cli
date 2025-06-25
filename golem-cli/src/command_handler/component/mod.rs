@@ -153,7 +153,7 @@ impl ComponentCommandHandler {
         }
     }
 
-    async fn cmd_new(
+    pub async fn cmd_new(
         &self,
         template: Option<ComponentTemplateName>,
         component_package_name: Option<PackageName>,
@@ -244,8 +244,8 @@ impl ComponentCommandHandler {
 
         Ok(())
     }
-
-    async fn cmd_build(
+    
+    pub async fn cmd_build(
         &self,
         component_name: ComponentOptionalComponentNames,
         build_args: BuildArgs,
@@ -273,7 +273,7 @@ impl ComponentCommandHandler {
             .await
     }
 
-    async fn cmd_deploy(
+    pub async fn cmd_deploy(
         &self,
         component_name: ComponentOptionalComponentNames,
         force_build: ForceBuildArg,
@@ -295,7 +295,7 @@ impl ComponentCommandHandler {
         Ok(())
     }
 
-    fn cmd_templates(&self, filter: Option<String>) {
+    pub fn cmd_templates(&self, filter: Option<String>) {
         match filter {
             Some(filter) => {
                 if let Some(language) = GuestLanguage::from_string(filter.clone()) {
@@ -312,7 +312,7 @@ impl ComponentCommandHandler {
         }
     }
 
-    async fn cmd_list(&self, component_name: Option<ComponentName>) -> anyhow::Result<()> {
+    pub async fn cmd_list(&self, component_name: Option<ComponentName>) -> anyhow::Result<()> {
         let show_sensitive = self.ctx.show_sensitive();
 
         let selected_component_names = self

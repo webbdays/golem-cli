@@ -16,6 +16,7 @@ use crate::command::api::ApiSubcommand;
 use crate::command::app::AppSubcommand;
 use crate::command::cloud::CloudSubcommand;
 use crate::command::component::ComponentSubcommand;
+use crate::command::mcp_server::McpServerSubcommand;
 use crate::command::plugin::PluginSubcommand;
 use crate::command::profile::ProfileSubcommand;
 use crate::command::worker::WorkerSubcommand;
@@ -554,6 +555,12 @@ pub enum GolemCliSubcommand {
         /// Selects shell
         shell: clap_complete::Shell,
     },
+    #[command(alias = "mcp")]
+    /// Mcp Server for golem-cli
+    McpServer {
+        #[clap(subcommand)]
+        subcommand: McpServerSubcommand,
+    }
 }
 
 pub mod shared_args {
@@ -623,14 +630,14 @@ pub mod shared_args {
         pub language: GuestLanguage,
     }
 
-    #[derive(Debug, Args)]
+    #[derive(Debug, Args, Default)]
     pub struct ForceBuildArg {
         /// When set to true will skip modification time based up-to-date checks, defaults to false
         #[clap(long, default_value = "false")]
         pub force_build: bool,
     }
 
-    #[derive(Debug, Args)]
+    #[derive(Debug, Args, Default)]
     pub struct BuildArgs {
         /// Select specific build step(s)
         #[clap(long, short)]
@@ -661,7 +668,7 @@ pub mod shared_args {
         pub stream_no_timestamp: bool,
     }
 
-    #[derive(Debug, Args)]
+    #[derive(Debug, Args, Default)]
     pub struct UpdateOrRedeployArgs {
         /// Update existing workers with auto or manual update mode
         #[clap(long, value_name = "UPDATE_MODE", short, conflicts_with_all = ["redeploy_workers", "redeploy_all"], num_args = 0..=1
@@ -1803,6 +1810,22 @@ pub mod server {
         },
         /// Clean the local server data directory
         Clean,
+    }
+}
+
+pub mod mcp_server {
+    use clap::Subcommand;
+
+    #[derive(Debug, Subcommand)]
+    pub enum McpServerSubcommand {
+        /// Run the MCP server
+        Run {
+            /// server port to serve the MCP API on (localhost), defaults to 3001
+            #[clap(long)]
+            port: Option<u16>,
+            #[clap(long)]
+            timeout: Option<u64>,
+        }
     }
 }
 

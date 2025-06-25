@@ -31,6 +31,7 @@ strum_macros = { workspace = true }
 toml_edit = { workspace = true }
 test-r = { workspace = true }
 indoc = { workspace = true }
+schemars = "0.9.0"
 
 [build-dependencies]
 cargo_metadata = { workspace = true }

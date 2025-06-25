@@ -14,6 +14,7 @@
 
 use crate::fs::{OverwriteSafeAction, OverwriteSafeActionPlan, PathExtra};
 use colored::{ColoredString, Colorize};
+use similar::DiffableStr;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::sync::{LazyLock, OnceLock, RwLock};
@@ -24,6 +25,7 @@ use tracing::debug;
 static LOG_STATE: LazyLock<RwLock<LogState>> = LazyLock::new(RwLock::default);
 static TERMINAL_WIDTH: OnceLock<Option<usize>> = OnceLock::new();
 static WRAP_PADDING: usize = 2;
+static MCP_LOGS: LazyLock<RwLock<Vec<String>>> = LazyLock::new(|| RwLock::new(Vec::new()));
 
 fn terminal_width() -> Option<usize> {
     *TERMINAL_WIDTH.get_or_init(|| terminal_size().map(|(width, _)| width.0 as usize))
@@ -35,8 +37,8 @@ pub enum Output {
     Stderr,
     None,
     TracingDebug,
+    Mcp
 }
-
 struct LogState {
     indents: Vec<Option<String>>,
     calculated_indent: String,
@@ -179,14 +181,18 @@ pub fn logln_internal(message: &str) {
     for line in lines {
         match state.output {
             Output::Stdout => {
-                println!("{}{}", state.calculated_indent, line)
+                println!("{}{}", state.calculated_indent, line);
             }
             Output::Stderr => {
-                eprintln!("{}{}", state.calculated_indent, line)
+                eprintln!("{}{}", state.calculated_indent, line);
             }
             Output::None => {}
             Output::TracingDebug => {
                 debug!("{}{}", state.calculated_indent, line);
+            }
+            Output::Mcp => {
+
+                store_log_line_for_mcp(&format!("{}", line.to_string()));
             }
         }
     }
@@ -343,6 +349,19 @@ impl LogColorize for PathBuf {
     fn as_str(&self) -> impl Colorize {
         ColoredString::from(self.display().to_string())
     }
+}
+
+fn store_log_line_for_mcp(line: &str) {
+    MCP_LOGS.write().unwrap().push(line.to_string());
+}
+
+pub fn pop_mcp_log_lines() -> Vec<String> {
+    let log_lines = MCP_LOGS.read().unwrap().clone();
+
+    // cleanup
+    MCP_LOGS.write().unwrap().clear();
+
+    log_lines
 }
 
 impl<P: AsRef<Path>> LogColorize for PathExtra<P> {
