@@ -1,63 +1,23 @@
-use async_trait::async_trait;
-use rust_mcp_sdk::{
-    mcp_server::ServerHandler,
-    schema::{
-        schema_utils::CallToolError, CallToolRequest, CallToolResult, ListToolsRequest,
-        ListToolsResult, RpcError,
-    },
-    McpServer,
+use rmcp::{
+    model::{Implementation, ProtocolVersion, ServerCapabilities, ServerInfo},
+    tool_handler, ServerHandler,
 };
 
-use crate::command_handler::mcp_server::tools::GolemCliTools;
-pub struct GolemCliMcpServerHandler;
+use crate::command_handler::mcp_server::GolemCliMcpServer;
 
-#[async_trait]
-impl ServerHandler for GolemCliMcpServerHandler {
-    async fn handle_list_tools_request(
-        &self,
-        _request: ListToolsRequest,
-        _runtime: &dyn McpServer,
-    ) -> std::result::Result<ListToolsResult, RpcError> {
-        Ok(ListToolsResult {
-            tools: GolemCliTools::tools(),
-            meta: None,
-            next_cursor: None,
-        })
-    }
-    
-    async fn handle_call_tool_request(
-        &self,
-        request: CallToolRequest,
-        _runtime: &dyn McpServer,
-    ) -> std::result::Result<CallToolResult, CallToolError> {
-
-        
-        let tool = GolemCliTools::try_from(request.params)?;
-
-
-        match tool {
-            GolemCliTools::CreateNewComponentTool(create_new_component_tool) => {
-                create_new_component_tool.call_tool().await
-            }
-            GolemCliTools::UpdateComponentTool(update_component_tool) => {
-                update_component_tool.call_tool().await
-            }
-            // GolemCliTools::BuildComponentTool(build_component_tool) => {
-            //     build_component_tool.call_tool().await
-            // }
-            GolemCliTools::FilterTemplatesComponentTool(filter_templates_component_tool) => {
-                filter_templates_component_tool.call_tool().await
-            }
-            // GolemCliTools::DeployComponentTool(deploy_components_tool) => {
-            //     deploy_components_tool.call_tool().await
-            // }
-            GolemCliTools::ListComponentTool(list_components_tool) => {
-                list_components_tool.call_tool().await
-            }
-            _ => {
-                Err(CallToolError("Tool not implemented".to_string().into()))
+#[tool_handler]
+impl ServerHandler for GolemCliMcpServer {
+    fn get_info(&self) -> ServerInfo {
+        ServerInfo {
+            capabilities: ServerCapabilities::builder().enable_tools().build(),
+            instructions: Some(
+                "Help user to do what normally they can do using golem cli".to_string(),
+            ),
+            protocol_version: ProtocolVersion::V_2025_03_26,
+            server_info: Implementation {
+                name: "Golem Cli Mcp Server".to_string(),
+                version: "0.1.0".to_string(),
             },
         }
-    
     }
 }

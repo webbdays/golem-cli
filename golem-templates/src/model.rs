@@ -14,6 +14,7 @@
 
 use fancy_regex::{Match, Regex};
 use heck::{ToLowerCamelCase, ToPascalCase, ToSnakeCase, ToTitleCase};
+use rmcp::schemars;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt::Formatter;
@@ -114,7 +115,18 @@ impl TemplateKind {
 }
 
 #[derive(
-    Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, EnumIter, Serialize, Deserialize,
+    Debug,
+    Copy,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    EnumIter,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
 )]
 pub enum GuestLanguage {
     C,
@@ -255,7 +267,9 @@ impl FromStr for GuestLanguageTier {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, schemars::JsonSchema,
+)]
 pub struct PackageName((String, String));
 
 impl PackageName {

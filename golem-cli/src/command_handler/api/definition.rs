@@ -75,7 +75,7 @@ impl ApiDefinitionCommandHandler {
         }
     }
 
-    async fn cmd_deploy(
+    pub async fn cmd_deploy(
         &self,
         name: Option<HttpApiDefinitionName>,
         update_or_redeploy: UpdateOrRedeployArgs,
@@ -151,7 +151,7 @@ impl ApiDefinitionCommandHandler {
         }
     }
 
-    async fn cmd_get(
+    pub async fn cmd_get(
         &self,
         project: ProjectOptionalFlagArg,
         api_def_id: ApiDefinitionId,
@@ -180,7 +180,7 @@ impl ApiDefinitionCommandHandler {
         }
     }
 
-    async fn cmd_list(
+    pub async fn cmd_list(
         &self,
         project: ProjectOptionalFlagArg,
         api_definition_id: Option<ApiDefinitionId>,
@@ -217,7 +217,7 @@ impl ApiDefinitionCommandHandler {
         Ok(())
     }
 
-    async fn cmd_delete(
+    pub async fn cmd_delete(
         &self,
         project: ProjectOptionalFlagArg,
         api_def_id: ApiDefinitionId,

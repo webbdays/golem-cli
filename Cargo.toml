@@ -128,6 +128,8 @@ wit-bindgen-rust = "0.40.0"
 wit-component = "0.228"
 wit-encoder = "0.228"
 wit-parser = "0.228"
+rmcp = { git = "https://github.com/modelcontextprotocol/rust-sdk", branch = "main", features=["transport-io", "macros", "server", "transport-sse-server", "transport-streamable-http-server", "transport-streamable-http-server-session"]}
+schemars = { version = "0.9.0" }
 
 [patch.crates-io]
 golem-client = { git = "https://github.com/golemcloud/golem.git", tag = "v1.3.0-dev.8" }

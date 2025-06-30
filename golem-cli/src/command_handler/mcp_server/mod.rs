@@ -1,70 +1,104 @@
-use std::sync::Arc;
-use rust_mcp_sdk::mcp_server::{hyper_server, HyperServerOptions};
-use rust_mcp_sdk::schema::{Implementation, InitializeResult, ServerCapabilities, ServerCapabilitiesTools, LATEST_PROTOCOL_VERSION};
-use rust_mcp_sdk::TransportOptions;
+use std::time::Duration;
 
 use crate::command::mcp_server::McpServerSubcommand;
-use crate::command_handler::mcp_server::handler::GolemCliMcpServerHandler;
-use crate::context::Context;
-use crate::log::log_action;
+
+use rmcp::{handler::server::tool::ToolRouter, transport::StreamableHttpServerConfig};
+
+use hyper_util::{
+    rt::{TokioExecutor, TokioIo},
+    server::conn::auto::Builder,
+    service::TowerToHyperService,
+};
+use rmcp::transport::streamable_http_server::{
+    session::local::LocalSessionManager, StreamableHttpService,
+};
 
 mod handler;
 mod tools;
 
-pub struct McpServerCommandHandler {
-    _ctx: Arc<Context>,
+pub struct McpServerCommandHandler {}
+
+impl Default for McpServerCommandHandler {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl McpServerCommandHandler {
-    pub fn new(_ctx: Arc<Context>) -> Self {
-        Self { _ctx }
+    pub fn new() -> Self {
+        Self {}
     }
 
-    pub async fn handle_command(
-        &self,
-        subcommand: McpServerSubcommand,
-    ) -> anyhow::Result<()> {
+    pub async fn handle_command(&self, subcommand: McpServerSubcommand) -> anyhow::Result<()> {
         match subcommand {
-            McpServerSubcommand::Run { port, timeout} => self.mcp_server_start(port, timeout).await,
+            McpServerSubcommand::Run { port, timeout } => {
+                self.mcp_server_start(port, timeout).await
+            }
         }
     }
 
-    async fn mcp_server_start(&self, port: Option<u16>, timeout: Option<u64>) -> anyhow::Result<()> {
+    async fn mcp_server_start(
+        &self,
+        port: Option<u16>,
+        timeout: Option<u64>,
+    ) -> anyhow::Result<()> {
         let port = port.unwrap_or(8080);
         let timeout = timeout.unwrap_or(6);
 
-
-        let server_details = InitializeResult {
-            capabilities: ServerCapabilities {
-                tools: Some(ServerCapabilitiesTools {list_changed: None}),
-                
+        let service = TowerToHyperService::new(StreamableHttpService::new(
+            || Ok(GolemCliMcpServer::new()),
+            LocalSessionManager::default().into(),
+            StreamableHttpServerConfig {
+                sse_keep_alive: Some(Duration::new(timeout, 0)),
                 ..Default::default()
             },
-            instructions: Some("Help user to do what normally they can do using golem cli directly".to_string()),
-            meta: None,
-            protocol_version: LATEST_PROTOCOL_VERSION.to_string(),
-            server_info: Implementation { name: "Golem Cli Mcp Server".to_string(), version: "0.1.0".to_string() },
-        };
+        ));
+        let listener = tokio::net::TcpListener::bind(format!("[::1]:{}", port)).await?;
+        loop {
+            let io = tokio::select! {
+                _ = tokio::signal::ctrl_c() => break,
+                accept = listener.accept() => {
+                    TokioIo::new(accept?.0)
+                }
+            };
+            let service = service.clone();
+            tokio::spawn(async move {
+                let _result = Builder::new(TokioExecutor::default())
+                    .serve_connection(io, service)
+                    .await;
+            });
+        }
 
-        let hyper_server_options = HyperServerOptions {
-            host: "127.0.0.1".to_string(),
-            port,
-            transport_options: TransportOptions {
-                timeout: std::time::Duration::from_secs(timeout),
-                ..Default::default()
-            }.into(),
-            ..Default::default()
-        };
-        log_action("Mcp Server Start", &format!("Golem Cli running MCP server at port: {}", port) );
+        Ok(())
+    }
+}
 
-        let server = hyper_server::create_server(server_details, GolemCliMcpServerHandler{}, hyper_server_options);
-        match server.start().await {
-            Ok(_) => {
-                Ok(())
-            }
-            Err(e) => {
-                Err(anyhow::anyhow!("Failed to start MCP server, {}",e))
-                },
+pub struct GolemCliMcpServer {
+    tool_router: ToolRouter<GolemCliMcpServer>,
+}
+
+impl GolemCliMcpServer {
+    fn new() -> Self {
+        Self {
+            tool_router: self::GolemCliMcpServer::tool_router_app()
+                + self::GolemCliMcpServer::tool_router_component()
+                + self::GolemCliMcpServer::tool_router_component_plugin()
+                + self::GolemCliMcpServer::tool_router_api()
+                + self::GolemCliMcpServer::tool_router_api_definition()
+                + self::GolemCliMcpServer::tool_router_api_deployment()
+                + self::GolemCliMcpServer::tool_router_api_security_scheme()
+                + self::GolemCliMcpServer::tool_router_api_cloud_certificate()
+                + self::GolemCliMcpServer::tool_router_api_cloud_domain()
+                + self::GolemCliMcpServer::tool_router_cloud_account()
+                + self::GolemCliMcpServer::tool_router_cloud_account_grant()
+                + self::GolemCliMcpServer::tool_router_cloud_project_plugin()
+                + self::GolemCliMcpServer::tool_router_cloud_project_policy()
+                + self::GolemCliMcpServer::tool_router_cloud_token()
+                + self::GolemCliMcpServer::tool_router_plugin()
+                + self::GolemCliMcpServer::tool_router_profile()
+                + self::GolemCliMcpServer::tool_router_profile_config()
+                + self::GolemCliMcpServer::tool_router_worker()
+                + self::GolemCliMcpServer::tool_router_repl(),
         }
     }
 }

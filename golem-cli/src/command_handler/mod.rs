@@ -39,13 +39,13 @@ use crate::command_handler::component::plugin_installation::PluginInstallationHa
 use crate::command_handler::component::ComponentCommandHandler;
 use crate::command_handler::interactive::InteractiveHandler;
 use crate::command_handler::log::LogHandler;
+use crate::command_handler::mcp_server::McpServerCommandHandler;
 use crate::command_handler::partial_match::ErrorHandler;
 use crate::command_handler::plugin::PluginCommandHandler;
 use crate::command_handler::profile::config::ProfileConfigCommandHandler;
 use crate::command_handler::profile::ProfileCommandHandler;
 use crate::command_handler::rib_repl::RibReplHandler;
 use crate::command_handler::worker::WorkerCommandHandler;
-use crate::command_handler::mcp_server::McpServerCommandHandler;
 use crate::context::Context;
 use crate::error::{ContextInitHintError, HintError, NonSuccessfulExit};
 use crate::log::{logln, set_log_output, Output};
@@ -69,12 +69,12 @@ mod cloud;
 mod component;
 pub(crate) mod interactive;
 mod log;
+mod mcp_server;
 mod partial_match;
 mod plugin;
 mod profile;
 mod rib_repl;
 mod worker;
-mod mcp_server;
 
 // NOTE: We are explicitly not using #[async_trait] here to be able to NOT have a Send bound
 // on the `handler_server_commands` method. Having a Send bound there causes "Send is not generic enough"
@@ -315,48 +315,51 @@ impl<Hooks: CommandHandlerHooks + 'static> CommandHandler<Hooks> {
     async fn handle_command(&self, command: GolemCliCommand) -> anyhow::Result<()> {
         match command.subcommand {
             GolemCliSubcommand::App { subcommand } => {
-                        self.ctx.app_handler().handle_command(subcommand).await
-                    }
+                self.ctx.app_handler().handle_command(subcommand).await
+            }
             GolemCliSubcommand::Component { subcommand } => {
-                        self.ctx
-                            .component_handler()
-                            .handle_command(subcommand)
-                            .await
-                    }
+                self.ctx
+                    .component_handler()
+                    .handle_command(subcommand)
+                    .await
+            }
             GolemCliSubcommand::Worker { subcommand } => {
-                        self.ctx.worker_handler().handle_command(subcommand).await
-                    }
+                self.ctx.worker_handler().handle_command(subcommand).await
+            }
             GolemCliSubcommand::Api { subcommand } => {
-                        self.ctx.api_handler().handle_command(subcommand).await
-                    }
+                self.ctx.api_handler().handle_command(subcommand).await
+            }
             GolemCliSubcommand::Plugin { subcommand } => {
-                        self.ctx.plugin_handler().handle_command(subcommand).await
-                    }
+                self.ctx.plugin_handler().handle_command(subcommand).await
+            }
             GolemCliSubcommand::Profile { subcommand } => {
-                        self.ctx.profile_handler().handle_command(subcommand).await
-                    }
+                self.ctx.profile_handler().handle_command(subcommand).await
+            }
             #[cfg(feature = "server-commands")]
-                    GolemCliSubcommand::Server { subcommand } => {
-                        self.hooks
-                            .handler_server_commands(self.ctx.clone(), subcommand)
-                            .await
-                    }
+            GolemCliSubcommand::Server { subcommand } => {
+                self.hooks
+                    .handler_server_commands(self.ctx.clone(), subcommand)
+                    .await
+            }
             GolemCliSubcommand::Cloud { subcommand } => {
-                        self.ctx.cloud_handler().handle_command(subcommand).await
-                    }
+                self.ctx.cloud_handler().handle_command(subcommand).await
+            }
             GolemCliSubcommand::Repl {
-                        component_name,
-                        version,
-                    } => {
-                        self.ctx
-                            .rib_repl_handler()
-                            .cmd_repl(component_name.component_name, version)
-                            .await
-                    }
+                component_name,
+                version,
+            } => {
+                self.ctx
+                    .rib_repl_handler()
+                    .cmd_repl(component_name.component_name, version)
+                    .await
+            }
             GolemCliSubcommand::Completion { shell } => self.cmd_completion(shell),
             GolemCliSubcommand::McpServer { subcommand } => {
-                self.ctx.mcp_server_handler().handle_command(subcommand).await
-            },
+                self.ctx
+                    .mcp_server_handler()
+                    .handle_command(subcommand)
+                    .await
+            }
         }
     }
 
@@ -508,7 +511,7 @@ impl Handlers for Arc<Context> {
     }
 
     fn mcp_server_handler(&self) -> McpServerCommandHandler {
-        McpServerCommandHandler::new(self.clone())
+        McpServerCommandHandler::new()
     }
 }
 

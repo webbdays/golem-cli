@@ -15,6 +15,7 @@
 // TODO: this should be part of model / config
 
 use chrono::{DateTime, Utc};
+use rmcp::schemars;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 use uuid::Uuid;
@@ -44,7 +45,7 @@ pub struct CloudAuthenticationConfigData {
     pub expires_at: DateTime<Utc>,
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct AccountId(pub String);
 
 impl From<String> for AccountId {

@@ -16,6 +16,7 @@ use crate::cloud::CloudAuthenticationConfig;
 use crate::model::{Format, HasFormatConfig};
 use anyhow::{anyhow, bail, Context};
 use itertools::Itertools;
+use rmcp::schemars;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
@@ -48,7 +49,9 @@ pub struct Config {
 const PROFILE_NAME_LOCAL: &str = "local";
 const PROFILE_NAME_CLOUD: &str = "cloud";
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize, schemars::JsonSchema,
+)]
 pub struct ProfileName(pub String);
 
 impl ProfileName {
@@ -118,7 +121,9 @@ pub struct NamedProfile {
     pub profile: Profile,
 }
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone, EnumIter, Serialize, Deserialize)]
+#[derive(
+    Debug, Eq, PartialEq, Copy, Clone, EnumIter, Serialize, Deserialize, schemars::JsonSchema,
+)]
 pub enum ProfileKind {
     Oss,
     Cloud,
