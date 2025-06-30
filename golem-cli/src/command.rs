@@ -156,9 +156,6 @@ pub struct GolemCliGlobalFlags {
     pub auth_token: Option<Uuid>,
 
     #[arg(skip)]
-    pub custom_global_cloud_profile: Option<ProfileName>,
-
-    #[arg(skip)]
     pub local_server_auto_start: bool,
 }
 
@@ -214,9 +211,7 @@ impl GolemCliGlobalFlags {
             self.http_batch_size = Some(
                 batch_size
                     .parse()
-                    .with_context(|| {
-                        format!("Failed to parse GOLEM_HTTP_BATCH_SIZE: {}", batch_size)
-                    })
+                    .with_context(|| format!("Failed to parse GOLEM_HTTP_BATCH_SIZE: {batch_size}"))
                     .unwrap(),
             )
         }
@@ -228,10 +223,6 @@ impl GolemCliGlobalFlags {
                     .context("Failed to parse GOLEM_AUTH_TOKEN, expected uuid")
                     .unwrap(),
             );
-        }
-
-        if let Ok(default_cloud_profile) = std::env::var("GOLEM_CUSTOM_GLOBAL_CLOUD_PROFILE") {
-            self.custom_global_cloud_profile = Some(default_cloud_profile.into());
         }
 
         if let Ok(auto_start) = std::env::var("GOLEM_LOCAL_SERVER_AUTO_START") {
@@ -424,7 +415,7 @@ impl GolemCliCommand {
 
             let missing_arg_error_name =
                 format!("<{}>", matcher.missing_positional_arg.to_uppercase());
-            let missing_args_error_name = format!("{}...", missing_arg_error_name);
+            let missing_args_error_name = format!("{missing_arg_error_name}...");
             if !error_context_args.contains(&missing_arg_error_name)
                 && !error_context_args.contains(&missing_args_error_name)
             {
@@ -564,8 +555,8 @@ pub enum GolemCliSubcommand {
 }
 
 pub mod shared_args {
-    use crate::cloud::AccountId;
     use crate::model::app::AppBuildStep;
+    use crate::model::AccountId;
     use crate::model::{
         ComponentName, ProjectName, ProjectReference, WorkerName, WorkerUpdateMode,
     };
@@ -1427,18 +1418,17 @@ pub mod plugin {
 
 pub mod profile {
     use crate::command::profile::config::ProfileConfigSubcommand;
-    use crate::config::{ProfileKind, ProfileName};
+    use crate::config::ProfileName;
     use crate::model::Format;
     use clap::Subcommand;
     use url::Url;
+    use uuid::Uuid;
 
     #[allow(clippy::large_enum_variant)]
     #[derive(Debug, Subcommand)]
     pub enum ProfileSubcommand {
         /// Create new global profile, call without <PROFILE_NAME> for interactive setup
         New {
-            /// Profile kind
-            profile_kind: ProfileKind,
             /// Name of the newly created profile
             name: Option<ProfileName>,
             /// Switch to the profile after creation
@@ -1456,6 +1446,9 @@ pub mod profile {
             /// Default output format
             #[arg(long, default_value_t = Format::Text)]
             default_format: Format,
+            /// Token to use for authenticating against Golem. If not provided an OAuth2 flow will be performed when authentication is needed for the first time.
+            #[arg(long)]
+            static_token: Option<Uuid>,
             /// Accept invalid certificates.
             ///
             /// Disables certificate validation.
@@ -2035,7 +2028,7 @@ mod test {
             "\n{}",
             bad_matchers
                 .into_iter()
-                .map(|(error, matcher)| format!("error: {}\nmatcher: {:?}\n", error, matcher))
+                .map(|(error, matcher)| format!("error: {error}\nmatcher: {matcher:?}\n"))
                 .join("\n")
         )
     }
@@ -2119,7 +2112,7 @@ mod test {
             "\n{}",
             commands_with_conflicting_flags
                 .iter()
-                .map(|e| format!("{:?}", e))
+                .map(|e| format!("{e:?}"))
                 .join("\n")
         );
     }
@@ -2139,10 +2132,7 @@ mod test {
                 match command.find_subcommand(subcommand) {
                     Some(subcommand) => command = subcommand,
                     None => {
-                        panic!(
-                            "Invalid help target: {}, {:?}, {}",
-                            target, subcommands, subcommand
-                        );
+                        panic!("Invalid help target: {target}, {subcommands:?}, {subcommand}");
                     }
                 }
             }

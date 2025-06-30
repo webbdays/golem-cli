@@ -1,7 +1,7 @@
 use crate::command::GolemCliGlobalFlags;
 use crate::command_handler::mcp_server::GolemCliMcpServer;
 use crate::command_handler::profile::ProfileCommandHandler;
-use crate::config::{ProfileKind, ProfileName};
+use crate::config::ProfileName;
 use crate::log::{McpClient, Output};
 use crate::model::Format;
 use console::strip_ansi_codes;
@@ -12,14 +12,13 @@ use serde::{Deserialize, Serialize};
 use std::future::Future;
 use std::sync::Arc;
 use url::Url;
+use uuid::Uuid;
 
 pub mod config;
 
 /// Create new global profile, call without <PROFILE_NAME> for interactive setup
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct New {
-    /// Profile kind
-    profile_kind: ProfileKind,
     /// Name of the newly created profile
     name: Option<ProfileName>,
     /// Switch to the profile after creation
@@ -35,6 +34,9 @@ pub struct New {
     cloud_url: Option<Url>,
     /// Default output format
     default_format: Format,
+    /// Token to use for authenticating against Golem. If not provided an OAuth2 flow will be performed when authentication is needed for the first time.
+    #[schemars(with = "String")]
+    static_token: Option<Uuid>,
     /// Accept invalid certificates.
     ///
     /// Disables certificate validation.
@@ -96,7 +98,6 @@ impl GolemCliMcpServer {
             Ok(ctx) => {
                 let command_new = ProfileCommandHandler::new(ctx.into());
                 match command_new.cmd_new(
-                    req.profile_kind,
                     req.name,
                     req.set_active,
                     req.component_url,
@@ -104,6 +105,7 @@ impl GolemCliMcpServer {
                     req.cloud_url,
                     req.default_format,
                     req.allow_insecure,
+                    req.static_token,
                 ) {
                     Ok(_) => Ok(CallToolResult {
                         content: vec![Content::text("Success")],
