@@ -121,6 +121,7 @@ hyper-util = "0.1.14"
 console = "0.15.11"
 rmcp = {workspace= true}
 schemars= {workspace= true}
+tokio-util = "0.7.15"
 
 [dev-dependencies]
 

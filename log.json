@@ -1,0 +1,3718 @@
+{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": {
+        "tools": [
+            {
+                "name": "update_app_workers",
+                "description": "Update app workers",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AppOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified all components are selected. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Try to automatically update all existing workers of the application to the latest version",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/AppOptionalComponentNames"
+                        },
+                        "update_mode": {
+                            "$ref": "#/definitions/WorkerUpdateMode",
+                            "description": "Update mode - auto or manual, defaults to \"auto\""
+                        }
+                    },
+                    "required": [
+                        "component_name",
+                        "update_mode"
+                    ],
+                    "title": "UpdateWorkers",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "deploy_api_definitions",
+                "description": "Deploy API Definitions and required components",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "HttpApiDefinitionName": {
+                            "type": "string"
+                        },
+                        "UpdateOrRedeployArgs": {
+                            "properties": {
+                                "redeploy_all": {
+                                    "description": "Delete and recreate components and HTTP APIs",
+                                    "type": "boolean"
+                                },
+                                "redeploy_http_api": {
+                                    "description": "Delete and recreate HTTP API definitions and deployment",
+                                    "type": "boolean"
+                                },
+                                "redeploy_workers": {
+                                    "description": "Delete and recreate existing workers",
+                                    "type": "boolean"
+                                },
+                                "update_workers": {
+                                    "$ref": "#/definitions/WorkerUpdateMode",
+                                    "description": "Update existing workers with auto or manual update mode",
+                                    "nullable": true
+                                }
+                            },
+                            "required": [
+                                "redeploy_all",
+                                "redeploy_http_api",
+                                "redeploy_workers"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Deploy API Definitions and required components",
+                    "properties": {
+                        "http_api_definition_name": {
+                            "$ref": "#/definitions/HttpApiDefinitionName",
+                            "description": "API definition to deploy, if not specified, all definitions are deployed",
+                            "nullable": true
+                        },
+                        "update_or_redeploy": {
+                            "$ref": "#/definitions/UpdateOrRedeployArgs"
+                        }
+                    },
+                    "required": [
+                        "update_or_redeploy"
+                    ],
+                    "title": "Deploy",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "update_component_plugin",
+                "description": "Update plugin in a golem app Component",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentName": {
+                            "properties": {
+                                "component_name": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Optional component name, if not specified component is selected based on the current directory. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Update component plugin",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentName",
+                            "description": "The component to update the plugin for"
+                        },
+                        "installation_id": {
+                            "description": "Installation id of the plugin to update",
+                            "type": "string"
+                        },
+                        "param": {
+                            "description": "Updated list of parameters (key-value pairs) passed to the plugin",
+                            "items": {
+                                "items": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ],
+                                "maxItems": 2,
+                                "minItems": 2,
+                                "type": "array"
+                            },
+                            "type": "array"
+                        },
+                        "priority": {
+                            "description": "Updated priority of the plugin - largest priority is applied first",
+                            "format": "int32",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "component_name",
+                        "installation_id",
+                        "param",
+                        "priority"
+                    ],
+                    "title": "Update",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "list_api_definitions",
+                "description": "Lists all API definitions",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ApiDefinitionId": {
+                            "type": "string"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectOptionalFlagArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Lists all API definitions",
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/ApiDefinitionId",
+                            "description": "API definition id to get all versions. Optional.",
+                            "nullable": true
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectOptionalFlagArg"
+                        }
+                    },
+                    "required": [
+                        "project"
+                    ],
+                    "title": "List",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "remove_profile",
+                "description": "Remove global profile",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProfileName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Remove global profile",
+                    "properties": {
+                        "profile_name": {
+                            "$ref": "#/definitions/ProfileName",
+                            "description": "Profile name to delete"
+                        }
+                    },
+                    "required": [
+                        "profile_name"
+                    ],
+                    "title": "Delete",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "delete_cloud_account",
+                "description": "Delete the account",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AccountId": {
+                            "type": "string"
+                        },
+                        "AccountIdOptionalArg": {
+                            "properties": {
+                                "account_id": {
+                                    "$ref": "#/definitions/AccountId",
+                                    "description": "Account ID",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Delete the account",
+                    "properties": {
+                        "account_id": {
+                            "$ref": "#/definitions/AccountIdOptionalArg"
+                        }
+                    },
+                    "required": [
+                        "account_id"
+                    ],
+                    "title": "Delete",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "set_default_output_format_profile",
+                "description": "Set default output format for the requested profile",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "Format": {
+                            "enum": [
+                                "Json",
+                                "Yaml",
+                                "Text"
+                            ],
+                            "type": "string"
+                        },
+                        "ProfileName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Set default output format for the requested profile",
+                    "properties": {
+                        "format": {
+                            "$ref": "#/definitions/Format",
+                            "description": "CLI output format"
+                        },
+                        "profile_name": {
+                            "$ref": "#/definitions/ProfileName",
+                            "description": "Profile name"
+                        }
+                    },
+                    "required": [
+                        "format",
+                        "profile_name"
+                    ],
+                    "title": "SetFormat",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "start_rib_repl",
+                "description": "Start Rib REPL for a selected component",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentName": {
+                            "properties": {
+                                "component_name": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Optional component name, if not specified component is selected based on the current directory. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Start Rib REPL for a selected component",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentName"
+                        },
+                        "version": {
+                            "description": "Optional component version to use, defaults to latest component version",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "component_name"
+                    ],
+                    "title": "Repl",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_plugin",
+                "description": "Get information about a registered plugin",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "description": "Unregister a plugin",
+                    "properties": {
+                        "plugin_name": {
+                            "description": "Plugin name",
+                            "type": "string"
+                        },
+                        "version": {
+                            "description": "Plugin version",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "plugin_name",
+                        "version"
+                    ],
+                    "title": "Unregister",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_worker_metadata",
+                "description": "Get worker metadata",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Get worker metadata",
+                    "properties": {
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "interupt_worker",
+                "description": "Interrupts a running worker",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Interrupts a running worker",
+                    "properties": {
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "Interrupt",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "redeploy_app_workers",
+                "description": "Redeploy app workers",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AppOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified all components are selected. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "ComponentName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Redeploy all workers of the application using the latest version",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/AppOptionalComponentNames"
+                        }
+                    },
+                    "required": [
+                        "component_name"
+                    ],
+                    "title": "RedeployWorkers",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "query_worker_oplog",
+                "description": "Queries and dumps a worker's full oplog",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Queries and dumps a worker's full oplog",
+                    "properties": {
+                        "from": {
+                            "description": "Index of the first oplog entry to get. If missing, the whole oplog is returned",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        },
+                        "query": {
+                            "description": "Lucene query to look for oplog entries. If missing, the whole oplog is returned",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "Oplog",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "deploy_components",
+                "description": "Deploy components of golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified components are selected based on the current directory Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "ForceBuildArg": {
+                            "properties": {
+                                "force_build": {
+                                    "description": "When set to true will skip modification time based up-to-date checks, defaults to false",
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "force_build"
+                            ],
+                            "type": "object"
+                        },
+                        "UpdateOrRedeployArgs": {
+                            "properties": {
+                                "redeploy_all": {
+                                    "description": "Delete and recreate components and HTTP APIs",
+                                    "type": "boolean"
+                                },
+                                "redeploy_http_api": {
+                                    "description": "Delete and recreate HTTP API definitions and deployment",
+                                    "type": "boolean"
+                                },
+                                "redeploy_workers": {
+                                    "description": "Delete and recreate existing workers",
+                                    "type": "boolean"
+                                },
+                                "update_workers": {
+                                    "$ref": "#/definitions/WorkerUpdateMode",
+                                    "description": "Update existing workers with auto or manual update mode",
+                                    "nullable": true
+                                }
+                            },
+                            "required": [
+                                "redeploy_all",
+                                "redeploy_http_api",
+                                "redeploy_workers"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "properties": {
+                        "component_names": {
+                            "$ref": "#/definitions/ComponentOptionalComponentNames"
+                        },
+                        "force_build_arg": {
+                            "$ref": "#/definitions/ForceBuildArg"
+                        },
+                        "update_or_redeploy_args": {
+                            "$ref": "#/definitions/UpdateOrRedeployArgs"
+                        }
+                    },
+                    "required": [
+                        "component_names",
+                        "force_build_arg",
+                        "update_or_redeploy_args"
+                    ],
+                    "title": "DeployComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "delete_api_deployment",
+                "description": "Delete api deployment",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectOptionalFlagArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Delete api deployment",
+                    "properties": {
+                        "project": {
+                            "$ref": "#/definitions/ProjectOptionalFlagArg"
+                        },
+                        "site": {
+                            "description": "Deployment site",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "project",
+                        "site"
+                    ],
+                    "title": "Delete",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "deploy_api_definitions_and_deployments",
+                "description": "Deploy API Definitions and Deployments",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "UpdateOrRedeployArgs": {
+                            "properties": {
+                                "redeploy_all": {
+                                    "description": "Delete and recreate components and HTTP APIs",
+                                    "type": "boolean"
+                                },
+                                "redeploy_http_api": {
+                                    "description": "Delete and recreate HTTP API definitions and deployment",
+                                    "type": "boolean"
+                                },
+                                "redeploy_workers": {
+                                    "description": "Delete and recreate existing workers",
+                                    "type": "boolean"
+                                },
+                                "update_workers": {
+                                    "$ref": "#/definitions/WorkerUpdateMode",
+                                    "description": "Update existing workers with auto or manual update mode",
+                                    "nullable": true
+                                }
+                            },
+                            "required": [
+                                "redeploy_all",
+                                "redeploy_http_api",
+                                "redeploy_workers"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Deploy API Definitions and Deployments",
+                    "properties": {
+                        "update_or_redeploy": {
+                            "$ref": "#/definitions/UpdateOrRedeployArgs"
+                        }
+                    },
+                    "required": [
+                        "update_or_redeploy"
+                    ],
+                    "title": "Deploy",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "build_components",
+                "description": "Build components in a golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AppBuildStep": {
+                            "enum": [
+                                "GenRpc",
+                                "Componentize",
+                                "Link",
+                                "AddMetadata"
+                            ],
+                            "type": "string"
+                        },
+                        "BuildArgs": {
+                            "properties": {
+                                "force_build": {
+                                    "$ref": "#/definitions/ForceBuildArg"
+                                },
+                                "step": {
+                                    "description": "Select specific build step(s)",
+                                    "items": {
+                                        "$ref": "#/definitions/AppBuildStep"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "force_build",
+                                "step"
+                            ],
+                            "type": "object"
+                        },
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified components are selected based on the current directory Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "ForceBuildArg": {
+                            "properties": {
+                                "force_build": {
+                                    "description": "When set to true will skip modification time based up-to-date checks, defaults to false",
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "force_build"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "properties": {
+                        "build_args": {
+                            "$ref": "#/definitions/BuildArgs"
+                        },
+                        "component_names": {
+                            "$ref": "#/definitions/ComponentOptionalComponentNames"
+                        }
+                    },
+                    "required": [
+                        "build_args",
+                        "component_names"
+                    ],
+                    "title": "BuildComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "deploy_app",
+                "description": "Deploy app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AppOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified all components are selected. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ForceBuildArg": {
+                            "properties": {
+                                "force_build": {
+                                    "description": "When set to true will skip modification time based up-to-date checks, defaults to false",
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "force_build"
+                            ],
+                            "type": "object"
+                        },
+                        "UpdateOrRedeployArgs": {
+                            "properties": {
+                                "redeploy_all": {
+                                    "description": "Delete and recreate components and HTTP APIs",
+                                    "type": "boolean"
+                                },
+                                "redeploy_http_api": {
+                                    "description": "Delete and recreate HTTP API definitions and deployment",
+                                    "type": "boolean"
+                                },
+                                "redeploy_workers": {
+                                    "description": "Delete and recreate existing workers",
+                                    "type": "boolean"
+                                },
+                                "update_workers": {
+                                    "$ref": "#/definitions/WorkerUpdateMode",
+                                    "description": "Update existing workers with auto or manual update mode",
+                                    "nullable": true
+                                }
+                            },
+                            "required": [
+                                "redeploy_all",
+                                "redeploy_http_api",
+                                "redeploy_workers"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Deploy all or selected components and HTTP APIs in the application, includes building",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/AppOptionalComponentNames"
+                        },
+                        "force_build": {
+                            "$ref": "#/definitions/ForceBuildArg"
+                        },
+                        "update_or_redeploy": {
+                            "$ref": "#/definitions/UpdateOrRedeployArgs"
+                        }
+                    },
+                    "required": [
+                        "component_name",
+                        "force_build",
+                        "update_or_redeploy"
+                    ],
+                    "title": "Deploy",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "update_project_plugin",
+                "description": "Update project plugin",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>"
+                                }
+                            },
+                            "required": [
+                                "project"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Update project plugin",
+                    "properties": {
+                        "param": {
+                            "description": "Updated list of parameters (key-value pairs) passed to the plugin",
+                            "items": {
+                                "items": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ],
+                                "maxItems": 2,
+                                "minItems": 2,
+                                "type": "array"
+                            },
+                            "type": "array"
+                        },
+                        "plugin_installation_id": {
+                            "description": "Installation id of the plugin to update",
+                            "type": "string"
+                        },
+                        "priority": {
+                            "description": "Updated priority of the plugin - largest priority is applied first",
+                            "format": "int32",
+                            "type": "integer"
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectArg"
+                        }
+                    },
+                    "required": [
+                        "param",
+                        "plugin_installation_id",
+                        "priority",
+                        "project"
+                    ],
+                    "title": "Update",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "create_new_worker",
+                "description": "Create new worker",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Create new worker",
+                    "properties": {
+                        "arguments": {
+                            "description": "Worker arguments",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "env": {
+                            "description": "Worker environment variables",
+                            "items": {
+                                "items": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ],
+                                "maxItems": 2,
+                                "minItems": 2,
+                                "type": "array"
+                            },
+                            "type": "array"
+                        },
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "arguments",
+                        "env",
+                        "worker_name"
+                    ],
+                    "title": "New",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_project_policies",
+                "description": "Gets the existing project sharing policies",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "description": "Gets the existing project sharing policies",
+                    "properties": {
+                        "policy_id": {
+                            "description": "Project policy ID",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "policy_id"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "uninstall_component_plugin",
+                "description": "UnInstall plugin in a golem app Component",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentName": {
+                            "properties": {
+                                "component_name": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Optional component name, if not specified component is selected based on the current directory. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Uninstall a plugin for selected component",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentName",
+                            "description": "The component to uninstall the plugin from"
+                        },
+                        "installation_id": {
+                            "description": "Installation id of the plugin to uninstall",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "component_name",
+                        "installation_id"
+                    ],
+                    "title": "Uninstall",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "install_project_plugin",
+                "description": "Install a plugin for a project",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>"
+                                }
+                            },
+                            "required": [
+                                "project"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Install a plugin for a project",
+                    "properties": {
+                        "param": {
+                            "description": "List of parameters (key-value pairs) passed to the plugin",
+                            "items": {
+                                "items": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ],
+                                "maxItems": 2,
+                                "minItems": 2,
+                                "type": "array"
+                            },
+                            "type": "array"
+                        },
+                        "plugin_name": {
+                            "description": "The plugin to install",
+                            "type": "string"
+                        },
+                        "plugin_version": {
+                            "description": "The version of the plugin to install",
+                            "type": "string"
+                        },
+                        "priority": {
+                            "description": "Priority of the plugin - largest priority is applied first",
+                            "format": "int32",
+                            "type": "integer"
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectArg"
+                        }
+                    },
+                    "required": [
+                        "param",
+                        "plugin_name",
+                        "plugin_version",
+                        "priority",
+                        "project"
+                    ],
+                    "title": "Install",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "delete_domain",
+                "description": "Delete an existing domain",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>"
+                                }
+                            },
+                            "required": [
+                                "project"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Delete an existing domain",
+                    "properties": {
+                        "domain_name": {
+                            "description": "Domain name",
+                            "type": "string"
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectArg"
+                        }
+                    },
+                    "required": [
+                        "domain_name",
+                        "project"
+                    ],
+                    "title": "Delete",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_cloud_account_grant_roles",
+                "description": "Get the roles granted to the account",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AccountId": {
+                            "type": "string"
+                        },
+                        "AccountIdOptionalArg": {
+                            "properties": {
+                                "account_id": {
+                                    "$ref": "#/definitions/AccountId",
+                                    "description": "Account ID",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Get the roles granted to the account",
+                    "properties": {
+                        "account_id": {
+                            "$ref": "#/definitions/AccountIdOptionalArg"
+                        }
+                    },
+                    "required": [
+                        "account_id"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "delete_api_definition",
+                "description": "Delete an existing API definition",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ApiDefinitionId": {
+                            "type": "string"
+                        },
+                        "ApiDefinitionVersion": {
+                            "type": "string"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectOptionalFlagArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Deletes an existing API definition",
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/ApiDefinitionId",
+                            "description": "API definition id"
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectOptionalFlagArg"
+                        },
+                        "version": {
+                            "$ref": "#/definitions/ApiDefinitionVersion",
+                            "description": "Version of the api definition"
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "project",
+                        "version"
+                    ],
+                    "title": "Delete",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "show_global_profile_details",
+                "description": "Show global profile details",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProfileName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Show global profile details",
+                    "properties": {
+                        "profile_name": {
+                            "$ref": "#/definitions/ProfileName",
+                            "description": "Name of profile to show, shows active profile if not specified.",
+                            "nullable": true
+                        }
+                    },
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "register_plugin",
+                "description": "Register a new plugin",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "PathBufOrStdin": {
+                            "oneOf": [
+                                {
+                                    "enum": [
+                                        "Stdin"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "Path": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "Path"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "PluginScopeArgs": {
+                            "properties": {
+                                "account": {
+                                    "description": "Account id, optionally specifies the account id for the project name",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                "component": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Component scope given by the component's name (plugin only available for this component)",
+                                    "nullable": true
+                                },
+                                "global": {
+                                    "description": "Global scope (plugin available for all components)",
+                                    "type": "boolean"
+                                },
+                                "project": {
+                                    "$ref": "#/definitions/ProjectName",
+                                    "description": "Project name; Required when component name is used. Without a given component, it defines a project scope.",
+                                    "nullable": true
+                                }
+                            },
+                            "required": [
+                                "global"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Register a new plugin",
+                    "properties": {
+                        "manifest": {
+                            "$ref": "#/definitions/PathBufOrStdin",
+                            "description": "Path to the plugin manifest JSON or '-' to use STDIN"
+                        },
+                        "scope": {
+                            "$ref": "#/definitions/PluginScopeArgs"
+                        }
+                    },
+                    "required": [
+                        "manifest",
+                        "scope"
+                    ],
+                    "title": "Register",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "create_new_project_policy",
+                "description": "Creates a new project sharing policy",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectPermission": {
+                            "enum": [
+                                "ViewComponent",
+                                "CreateComponent",
+                                "UpdateComponent",
+                                "DeleteComponent",
+                                "ViewWorker",
+                                "CreateWorker",
+                                "UpdateWorker",
+                                "DeleteWorker",
+                                "ViewProjectGrants",
+                                "CreateProjectGrants",
+                                "DeleteProjectGrants",
+                                "ViewApiDefinition",
+                                "CreateApiDefinition",
+                                "UpdateApiDefinition",
+                                "DeleteApiDefinition",
+                                "DeleteProject",
+                                "ViewPluginInstallations",
+                                "CreatePluginInstallation",
+                                "UpdatePluginInstallation",
+                                "DeletePluginInstallation",
+                                "UpsertApiDeployment",
+                                "ViewApiDeployment",
+                                "DeleteApiDeployment",
+                                "UpsertApiDomain",
+                                "ViewApiDomain",
+                                "DeleteApiDomain"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Creates a new project sharing policy",
+                    "properties": {
+                        "actions": {
+                            "description": "List of actions allowed by the policy",
+                            "items": {
+                                "$ref": "#/definitions/ProjectPermission"
+                            },
+                            "type": "array"
+                        },
+                        "policy_name": {
+                            "description": "Name of the policy",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "actions",
+                        "policy_name"
+                    ],
+                    "title": "New",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "list_components_for_scope",
+                "description": "List component for the select scope",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "PluginScopeArgs": {
+                            "properties": {
+                                "account": {
+                                    "description": "Account id, optionally specifies the account id for the project name",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                "component": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Component scope given by the component's name (plugin only available for this component)",
+                                    "nullable": true
+                                },
+                                "global": {
+                                    "description": "Global scope (plugin available for all components)",
+                                    "type": "boolean"
+                                },
+                                "project": {
+                                    "$ref": "#/definitions/ProjectName",
+                                    "description": "Project name; Required when component name is used. Without a given component, it defines a project scope.",
+                                    "nullable": true
+                                }
+                            },
+                            "required": [
+                                "global"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "List component for the select scope",
+                    "properties": {
+                        "scope": {
+                            "$ref": "#/definitions/PluginScopeArgs",
+                            "description": "The scope to list components from"
+                        }
+                    },
+                    "required": [
+                        "scope"
+                    ],
+                    "title": "List",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_component_plugin",
+                "description": "Get plugin in a golem app Component",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentName": {
+                            "properties": {
+                                "component_name": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Optional component name, if not specified component is selected based on the current directory. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Get the installed plugins of the component",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentName"
+                        },
+                        "version": {
+                            "description": "The version of the component",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "component_name"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_component",
+                "description": "get component details in golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        }
+                    },
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentName",
+                            "description": "Component name in the format: <Namespace>:<Name>",
+                            "nullable": true
+                        },
+                        "version": {
+                            "description": "Component version in integer(u64)",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        }
+                    },
+                    "title": "GetComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "filter_templates",
+                "description": "Filter templates by filter string provided by golem",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "properties": {
+                        "filter": {
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    },
+                    "title": "FilterTemplatesComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "add_dependency_to_a_component",
+                "description": "Add dependency to a component in golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "DependencyType": {
+                            "oneOf": [
+                                {
+                                    "description": "Dynamic (\"stubless\") wasm-rpc",
+                                    "enum": [
+                                        "DynamicWasmRpc"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "description": "Static (composed with compiled stub) wasm-rpc",
+                                    "enum": [
+                                        "StaticWasmRpc"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "description": "Composes the two WASM components together",
+                                    "enum": [
+                                        "Wasm"
+                                    ],
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Add or update a component dependency",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentName",
+                            "description": "The name of the component to which the dependency should be added",
+                            "nullable": true
+                        },
+                        "dependency_type": {
+                            "$ref": "#/definitions/DependencyType",
+                            "description": "The type of the dependency, defaults to wasm-rpc",
+                            "nullable": true
+                        },
+                        "target_component_name": {
+                            "$ref": "#/definitions/ComponentName",
+                            "description": "The name of the component that will be used as the target component",
+                            "nullable": true
+                        },
+                        "target_component_path": {
+                            "description": "The path to the local component WASM that will be used as the target",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        "target_component_url": {
+                            "description": "The URL to the remote component WASM that will be used as the target",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "target_component_url"
+                    ],
+                    "title": "AddDependencyTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "create_new_component",
+                "description": "Create a new golem component in a golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "PackageName": {
+                            "items": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "maxItems": 2,
+                            "minItems": 2,
+                            "type": "array"
+                        }
+                    },
+                    "properties": {
+                        "component_package_name": {
+                            "$ref": "#/definitions/PackageName",
+                            "description": "Package name in the format: (<Namespace>,<Name>), an array",
+                            "nullable": true
+                        },
+                        "template": {
+                            "description": "Template to use to create a new component. Accepted format : <LANGUAGE>/<NAME>",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    },
+                    "title": "CreateNewComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "build_app",
+                "description": "Build app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AppBuildStep": {
+                            "enum": [
+                                "GenRpc",
+                                "Componentize",
+                                "Link",
+                                "AddMetadata"
+                            ],
+                            "type": "string"
+                        },
+                        "AppOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified all components are selected. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "BuildArgs": {
+                            "properties": {
+                                "force_build": {
+                                    "$ref": "#/definitions/ForceBuildArg"
+                                },
+                                "step": {
+                                    "description": "Select specific build step(s)",
+                                    "items": {
+                                        "$ref": "#/definitions/AppBuildStep"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "force_build",
+                                "step"
+                            ],
+                            "type": "object"
+                        },
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ForceBuildArg": {
+                            "properties": {
+                                "force_build": {
+                                    "description": "When set to true will skip modification time based up-to-date checks, defaults to false",
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "force_build"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Build all or selected components in the application",
+                    "properties": {
+                        "build": {
+                            "$ref": "#/definitions/BuildArgs"
+                        },
+                        "component_name": {
+                            "$ref": "#/definitions/AppOptionalComponentNames"
+                        }
+                    },
+                    "required": [
+                        "build",
+                        "component_name"
+                    ],
+                    "title": "Build",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "create_new_cloud_account_grant",
+                "description": "Grant a new role to the account",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AccountId": {
+                            "type": "string"
+                        },
+                        "AccountIdOptionalArg": {
+                            "properties": {
+                                "account_id": {
+                                    "$ref": "#/definitions/AccountId",
+                                    "description": "Account ID",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "Role": {
+                            "enum": [
+                                "Admin",
+                                "MarketingAdmin"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Grant a new role to the account",
+                    "properties": {
+                        "account_id": {
+                            "$ref": "#/definitions/AccountIdOptionalArg"
+                        },
+                        "role": {
+                            "$ref": "#/definitions/Role",
+                            "description": "The role to be granted"
+                        }
+                    },
+                    "required": [
+                        "account_id",
+                        "role"
+                    ],
+                    "title": "New",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "list_global_profiles",
+                "description": "List global profiles",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "description": "List global profiles",
+                    "title": "List",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "update_worker",
+                "description": "Updates a worker",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Updates a worker",
+                    "properties": {
+                        "mode": {
+                            "$ref": "#/definitions/WorkerUpdateMode",
+                            "description": "Update mode - auto or manual (default is auto)",
+                            "nullable": true
+                        },
+                        "target_version": {
+                            "description": "The new version of the updated worker (default is the latest version)",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        },
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "Update",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "diagnose_components",
+                "description": "Diagnose components in golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified components are selected based on the current directory Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Diagnose possible tooling problems",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentNames"
+                        }
+                    },
+                    "required": [
+                        "component_name"
+                    ],
+                    "title": "DiagnoseComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "create_new_app",
+                "description": "Create a new golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "GuestLanguage": {
+                            "enum": [
+                                "C",
+                                "Go",
+                                "JavaScript",
+                                "Python",
+                                "Rust",
+                                "TypeScript",
+                                "Zig",
+                                "ScalaJs",
+                                "MoonBit"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Create new application",
+                    "properties": {
+                        "application_name": {
+                            "description": "Application folder name where the new application should be created",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        "language": {
+                            "description": "Languages that the application should support",
+                            "items": {
+                                "$ref": "#/definitions/GuestLanguage"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "required": [
+                        "language"
+                    ],
+                    "title": "New",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "list_worker_metadata",
+                "description": "List worker metadata",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentName": {
+                            "properties": {
+                                "component_name": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Optional component name, if not specified component is selected based on the current directory. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "List worker metadata",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentName"
+                        },
+                        "filter": {
+                            "description": "Filter for worker metadata in form of `property op value`.\n\nFilter examples: `name = worker-name`, `version >= 0`, `status = Running`, `env.var1 = value`. Can be used multiple times (AND condition is applied between them)",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "max_count": {
+                            "description": "Cursor position, if not provided, starts from the beginning.\n\nCursor can be used to get the next page of results, use the cursor returned in the previous response. The cursor has the format 'layer/position' where both layer and position are numbers. The maximum the number of returned workers, returns all values is not specified. When multiple component is selected, then the limit it is applied separately",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        },
+                        "precise": {
+                            "description": "When set to true it queries for most up-to-date status for each worker, default is false",
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "component_name",
+                        "filter",
+                        "precise"
+                    ],
+                    "title": "List",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "simulate_worker_crash",
+                "description": "Simulates a crash on a worker for testing purposes. The worker starts recovering and resuming immediately.",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Simulates a crash on a worker for testing purposes.\n\nThe worker starts recovering and resuming immediately.",
+                    "properties": {
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "SimulateCrash",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "update_workers",
+                "description": "Update workers of a golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentName",
+                            "description": "Component name in the format: <Namespace>:<Name>\")]",
+                            "nullable": true
+                        },
+                        "worker_update_mode": {
+                            "$ref": "#/definitions/WorkerUpdateMode"
+                        }
+                    },
+                    "required": [
+                        "worker_update_mode"
+                    ],
+                    "title": "UpdateWorkersTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "invoke_worker",
+                "description": "Invoke (or enqueue invocation for) worker",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "IdempotencyKey": {
+                            "type": "string"
+                        },
+                        "StreamArgs": {
+                            "properties": {
+                                "stream_no_log_level": {
+                                    "description": "Hide log levels in stream output",
+                                    "type": "boolean"
+                                },
+                                "stream_no_timestamp": {
+                                    "description": "Hide timestamp in stream output",
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "stream_no_log_level",
+                                "stream_no_timestamp"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Invoke (or enqueue invocation for) worker",
+                    "properties": {
+                        "arguments": {
+                            "description": "Worker function arguments in WAVE format",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "enqueue": {
+                            "description": "Enqueue invocation, and do not wait for it",
+                            "type": "boolean"
+                        },
+                        "function_name": {
+                            "description": "Worker function name to invoke",
+                            "type": "string"
+                        },
+                        "idempotency_key": {
+                            "$ref": "#/definitions/IdempotencyKey",
+                            "description": "Set idempotency key for the call, use \"-\" for auto generated key",
+                            "nullable": true
+                        },
+                        "stream": {
+                            "description": "Connect to the worker before invoke (the worker must already exist) and live stream its standard output, error and log channels",
+                            "type": "boolean"
+                        },
+                        "stream_args": {
+                            "$ref": "#/definitions/StreamArgs"
+                        },
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "arguments",
+                        "enqueue",
+                        "function_name",
+                        "stream",
+                        "stream_args",
+                        "worker_name"
+                    ],
+                    "title": "Invoke",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "unregister_plugin",
+                "description": "Unregister a new plugin",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "description": "Unregister a plugin",
+                    "properties": {
+                        "plugin_name": {
+                            "description": "Plugin name",
+                            "type": "string"
+                        },
+                        "version": {
+                            "description": "Plugin version",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "plugin_name",
+                        "version"
+                    ],
+                    "title": "Unregister",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "add_new_domain",
+                "description": "Add new domain",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>"
+                                }
+                            },
+                            "required": [
+                                "project"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Add new domain",
+                    "properties": {
+                        "domain_name": {
+                            "description": "Domain name",
+                            "type": "string"
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectArg"
+                        }
+                    },
+                    "required": [
+                        "domain_name",
+                        "project"
+                    ],
+                    "title": "New",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "create_new_cloud_account",
+                "description": "Add a new account",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "description": "Add a new account",
+                    "properties": {
+                        "account_email": {
+                            "description": "The new account's email address",
+                            "type": "string"
+                        },
+                        "account_name": {
+                            "description": "The new account's name",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "account_email",
+                        "account_name"
+                    ],
+                    "title": "New",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "delete_worker",
+                "description": "Deletes a worker",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Deletes a worker",
+                    "properties": {
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "Delete",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "delete_cloud_account_grant_role",
+                "description": "Remove a role from the account",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AccountId": {
+                            "type": "string"
+                        },
+                        "AccountIdOptionalArg": {
+                            "properties": {
+                                "account_id": {
+                                    "$ref": "#/definitions/AccountId",
+                                    "description": "Account ID",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "Role": {
+                            "enum": [
+                                "Admin",
+                                "MarketingAdmin"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Remove a role from the account",
+                    "properties": {
+                        "account_id": {
+                            "$ref": "#/definitions/AccountIdOptionalArg"
+                        },
+                        "role": {
+                            "$ref": "#/definitions/Role",
+                            "description": "The role to be deleted"
+                        }
+                    },
+                    "required": [
+                        "account_id",
+                        "role"
+                    ],
+                    "title": "Delete",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "diagnose_app",
+                "description": "Diagnose app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AppOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified all components are selected. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "ComponentName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Diagnose possible tooling problems",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/AppOptionalComponentNames"
+                        }
+                    },
+                    "required": [
+                        "component_name"
+                    ],
+                    "title": "Diagnose",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "switch_profile",
+                "description": "Set the active global default profile",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProfileName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Set the active global default profile",
+                    "properties": {
+                        "profile_name": {
+                            "$ref": "#/definitions/ProfileName",
+                            "description": "Profile name to switch to"
+                        }
+                    },
+                    "required": [
+                        "profile_name"
+                    ],
+                    "title": "Switch",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "clean_components",
+                "description": "Clean components in golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified components are selected based on the current directory Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentNames"
+                        }
+                    },
+                    "required": [
+                        "component_name"
+                    ],
+                    "title": "CleanComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "list_api_deployment",
+                "description": "List API deployment for API definition",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ApiDefinitionId": {
+                            "type": "string"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectOptionalFlagArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "List API deployment for API definition",
+                    "properties": {
+                        "definition": {
+                            "$ref": "#/definitions/ApiDefinitionId",
+                            "description": "API definition id",
+                            "nullable": true
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectOptionalFlagArg"
+                        }
+                    },
+                    "required": [
+                        "project"
+                    ],
+                    "title": "List",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_api_deployment",
+                "description": "Retrieves metadata about an existing API deployment",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectOptionalFlagArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Get API deployment",
+                    "properties": {
+                        "project": {
+                            "$ref": "#/definitions/ProjectOptionalFlagArg"
+                        },
+                        "site": {
+                            "description": "Deployment site",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "project",
+                        "site"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "update_cloud_account",
+                "description": "Update some information about the account",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AccountId": {
+                            "type": "string"
+                        },
+                        "AccountIdOptionalArg": {
+                            "properties": {
+                                "account_id": {
+                                    "$ref": "#/definitions/AccountId",
+                                    "description": "Account ID",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Update some information about the account",
+                    "properties": {
+                        "account_email": {
+                            "description": "Set the account's email address",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        "account_id": {
+                            "$ref": "#/definitions/AccountIdOptionalArg"
+                        },
+                        "account_name": {
+                            "description": "Set the account's name",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "account_id"
+                    ],
+                    "title": "Update",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "uninstall_project_plugin",
+                "description": "Uninstall a plugin for selected component",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>"
+                                }
+                            },
+                            "required": [
+                                "project"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Uninstall a plugin for selected component",
+                    "properties": {
+                        "plugin_installation_id": {
+                            "description": "Installation id of the plugin to uninstall",
+                            "type": "string"
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectArg"
+                        }
+                    },
+                    "required": [
+                        "plugin_installation_id",
+                        "project"
+                    ],
+                    "title": "Uninstall",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "clean_app",
+                "description": "Clean app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AppOptionalComponentNames": {
+                            "properties": {
+                                "component_name": {
+                                    "description": "Optional component names, if not specified all components are selected. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "items": {
+                                        "$ref": "#/definitions/ComponentName"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "component_name"
+                            ],
+                            "type": "object"
+                        },
+                        "ComponentName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Clean all components in the application or by selection",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/AppOptionalComponentNames"
+                        }
+                    },
+                    "required": [
+                        "component_name"
+                    ],
+                    "title": "Clean",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "install_component_plugin",
+                "description": "Install plugin in a golem app Component",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        },
+                        "ComponentOptionalComponentName": {
+                            "properties": {
+                                "component_name": {
+                                    "$ref": "#/definitions/ComponentName",
+                                    "description": "Optional component name, if not specified component is selected based on the current directory. Accepted formats: - <COMPONENT> - <PROJECT>/<COMPONENT> - <ACCOUNT>/<PROJECT>/<COMPONENT>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Install a plugin for selected component",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentOptionalComponentName"
+                        },
+                        "param": {
+                            "description": "List of parameters (key-value pairs) passed to the plugin",
+                            "items": {
+                                "items": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ],
+                                "maxItems": 2,
+                                "minItems": 2,
+                                "type": "array"
+                            },
+                            "type": "array"
+                        },
+                        "plugin_name": {
+                            "description": "The plugin to install",
+                            "type": "string"
+                        },
+                        "plugin_version": {
+                            "description": "The version of the plugin to install",
+                            "type": "string"
+                        },
+                        "priority": {
+                            "description": "Priority of the plugin - largest priority is applied first",
+                            "format": "int32",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "component_name",
+                        "param",
+                        "plugin_name",
+                        "plugin_version",
+                        "priority"
+                    ],
+                    "title": "Install",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "revert_worker_operations",
+                "description": "Reverts a worker by undoing its last recorded operations",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Reverts a worker by undoing its last recorded operations",
+                    "properties": {
+                        "last_oplog_index": {
+                            "description": "Revert by oplog index",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        },
+                        "number_of_invocations": {
+                            "description": "Revert by number of invocations",
+                            "format": "uint64",
+                            "minimum": 0,
+                            "nullable": true,
+                            "type": "integer"
+                        },
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "Revert",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_domain",
+                "description": "Retrieves metadata about an existing domain",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>"
+                                }
+                            },
+                            "required": [
+                                "project"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Retrieves metadata about an existing domain",
+                    "properties": {
+                        "project": {
+                            "$ref": "#/definitions/ProjectArg"
+                        }
+                    },
+                    "required": [
+                        "project"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "list_components",
+                "description": "List components in golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        }
+                    },
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentName",
+                            "description": "Component name in the format: <Namespace>:<Name>",
+                            "nullable": true
+                        }
+                    },
+                    "title": "ListComponentTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "custom_command",
+                "description": "Custom command in a golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "description": "Run custom command",
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "CustomCommand",
+                    "type": "array"
+                }
+            },
+            {
+                "name": "redeploy_component_workers",
+                "description": "Redeploy workers of a golem app",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ComponentName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Redeploy all workers of the selected component using the latest version",
+                    "properties": {
+                        "component_name": {
+                            "$ref": "#/definitions/ComponentName",
+                            "description": "Component name in the format: <Namespace>:<Name>\"",
+                            "nullable": true
+                        }
+                    },
+                    "title": "RedeployWorkersTool",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "deploy_api_deployments",
+                "description": "Deploy API Deployments",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "UpdateOrRedeployArgs": {
+                            "properties": {
+                                "redeploy_all": {
+                                    "description": "Delete and recreate components and HTTP APIs",
+                                    "type": "boolean"
+                                },
+                                "redeploy_http_api": {
+                                    "description": "Delete and recreate HTTP API definitions and deployment",
+                                    "type": "boolean"
+                                },
+                                "redeploy_workers": {
+                                    "description": "Delete and recreate existing workers",
+                                    "type": "boolean"
+                                },
+                                "update_workers": {
+                                    "$ref": "#/definitions/WorkerUpdateMode",
+                                    "description": "Update existing workers with auto or manual update mode",
+                                    "nullable": true
+                                }
+                            },
+                            "required": [
+                                "redeploy_all",
+                                "redeploy_http_api",
+                                "redeploy_workers"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerUpdateMode": {
+                            "enum": [
+                                "Automatic",
+                                "Manual"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "description": "Deploy API Deployments",
+                    "properties": {
+                        "host_or_site": {
+                            "description": "Host or site to deploy, if not defined, all deployments will be deployed",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        "update_or_redeploy": {
+                            "$ref": "#/definitions/UpdateOrRedeployArgs"
+                        }
+                    },
+                    "required": [
+                        "update_or_redeploy"
+                    ],
+                    "title": "Deploy",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_cloud_account",
+                "description": "Get information about the account",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "AccountId": {
+                            "type": "string"
+                        },
+                        "AccountIdOptionalArg": {
+                            "properties": {
+                                "account_id": {
+                                    "$ref": "#/definitions/AccountId",
+                                    "description": "Account ID",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "description": "Get information about the account",
+                    "properties": {
+                        "account_id": {
+                            "$ref": "#/definitions/AccountIdOptionalArg"
+                        }
+                    },
+                    "required": [
+                        "account_id"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_api_definition",
+                "description": "Retrieves metadata about an existing API definition",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ApiDefinitionId": {
+                            "type": "string"
+                        },
+                        "ApiDefinitionVersion": {
+                            "type": "string"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectOptionalFlagArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Retrieves metadata about an existing API definition",
+                    "properties": {
+                        "id": {
+                            "$ref": "#/definitions/ApiDefinitionId",
+                            "description": "API definition id"
+                        },
+                        "project": {
+                            "$ref": "#/definitions/ProjectOptionalFlagArg"
+                        },
+                        "version": {
+                            "$ref": "#/definitions/ApiDefinitionVersion",
+                            "description": "Version of the api definition"
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "project",
+                        "version"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "get_cloud_project_plugins",
+                "description": "Get the installed plugins for the project",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "ProjectArg": {
+                            "properties": {
+                                "project": {
+                                    "$ref": "#/definitions/ProjectReference",
+                                    "description": "Project, accepted formats: - <PROJECT_NAME> - <ACCOUNT_EMAIL>/<PROJECT_NAME>"
+                                }
+                            },
+                            "required": [
+                                "project"
+                            ],
+                            "type": "object"
+                        },
+                        "ProjectName": {
+                            "type": "string"
+                        },
+                        "ProjectReference": {
+                            "oneOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "JustName": {
+                                            "$ref": "#/definitions/ProjectName"
+                                        }
+                                    },
+                                    "required": [
+                                        "JustName"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "WithAccount": {
+                                            "properties": {
+                                                "account_email": {
+                                                    "type": "string"
+                                                },
+                                                "project_name": {
+                                                    "$ref": "#/definitions/ProjectName"
+                                                }
+                                            },
+                                            "required": [
+                                                "account_email",
+                                                "project_name"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "WithAccount"
+                                    ],
+                                    "type": "object"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "Get the installed plugins for the project",
+                    "properties": {
+                        "project": {
+                            "$ref": "#/definitions/ProjectArg"
+                        }
+                    },
+                    "required": [
+                        "project"
+                    ],
+                    "title": "Get",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "create_new_global_profile",
+                "description": "Create new global profile",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "Format": {
+                            "enum": [
+                                "Json",
+                                "Yaml",
+                                "Text"
+                            ],
+                            "type": "string"
+                        },
+                        "ProfileName": {
+                            "type": "string"
+                        }
+                    },
+                    "description": "Create new global profile, call without <PROFILE_NAME> for interactive setup",
+                    "properties": {
+                        "allow_insecure": {
+                            "description": "Token to use for authenticating against Golem. If not provided an OAuth2 flow will be performed when authentication is needed for the first time. Accept invalid certificates.\n\nDisables certificate validation. Warning! Any certificate will be trusted for use. This includes expired certificates. This introduces significant vulnerabilities, and should only be used as a last resort.",
+                            "type": "boolean"
+                        },
+                        "cloud_url": {
+                            "description": "URL of Golem Cloud service, if not provided defaults to component-url",
+                            "type": "string"
+                        },
+                        "component_url": {
+                            "description": "URL of Golem Component service",
+                            "type": "string"
+                        },
+                        "default_format": {
+                            "$ref": "#/definitions/Format",
+                            "description": "Default output format"
+                        },
+                        "name": {
+                            "$ref": "#/definitions/ProfileName",
+                            "description": "Name of the newly created profile",
+                            "nullable": true
+                        },
+                        "set_active": {
+                            "description": "Switch to the profile after creation",
+                            "type": "boolean"
+                        },
+                        "worker_url": {
+                            "description": "URL of Golem Worker service, if not provided defaults to component-url",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "allow_insecure",
+                        "cloud_url",
+                        "component_url",
+                        "default_format",
+                        "set_active",
+                        "worker_url"
+                    ],
+                    "title": "New",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "cancel_worker_invocation",
+                "description": "Cancels an enqueued invocation if it has not started yet",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "IdempotencyKey": {
+                            "type": "string"
+                        },
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Cancels an enqueued invocation if it has not started yet",
+                    "properties": {
+                        "idempotency_key": {
+                            "$ref": "#/definitions/IdempotencyKey",
+                            "description": "Idempotency key of the invocation to be cancelled"
+                        },
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "idempotency_key",
+                        "worker_name"
+                    ],
+                    "title": "CancelInvocation",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "stream_worker_outputs",
+                "description": "Connect to a worker and live stream its standard output, error and log channels",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "StreamArgs": {
+                            "properties": {
+                                "stream_no_log_level": {
+                                    "description": "Hide log levels in stream output",
+                                    "type": "boolean"
+                                },
+                                "stream_no_timestamp": {
+                                    "description": "Hide timestamp in stream output",
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "stream_no_log_level",
+                                "stream_no_timestamp"
+                            ],
+                            "type": "object"
+                        },
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Connect to a worker and live stream its standard output, error and log channels",
+                    "properties": {
+                        "stream_args": {
+                            "$ref": "#/definitions/StreamArgs"
+                        },
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "stream_args",
+                        "worker_name"
+                    ],
+                    "title": "Stream",
+                    "type": "object"
+                }
+            },
+            {
+                "name": "resume_worker",
+                "description": "Resume an interrupted worker",
+                "inputSchema": {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "definitions": {
+                        "WorkerName": {
+                            "type": "string"
+                        },
+                        "WorkerNameArg": {
+                            "properties": {
+                                "worker_name": {
+                                    "$ref": "#/definitions/WorkerName",
+                                    "description": "Worker name, accepted formats: - <WORKER> - <COMPONENT>/<WORKER> - <PROJECT>/<COMPONENT>/<WORKER> - <ACCOUNT>/<PROJECT>/<COMPONENT>/<WORKER>"
+                                }
+                            },
+                            "required": [
+                                "worker_name"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "description": "Resume an interrupted worker",
+                    "properties": {
+                        "worker_name": {
+                            "$ref": "#/definitions/WorkerNameArg"
+                        }
+                    },
+                    "required": [
+                        "worker_name"
+                    ],
+                    "title": "Resume",
+                    "type": "object"
+                }
+            }
+        ]
+    }
+}

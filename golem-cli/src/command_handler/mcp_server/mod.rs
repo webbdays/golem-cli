@@ -2,7 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use crate::{command::mcp_server::McpServerSubcommand, context::Context};
 
-use rmcp::{handler::server::tool::ToolRouter, transport::StreamableHttpServerConfig};
+use rmcp::{handler::server::tool::ToolRouter, transport::{SseServer, StreamableHttpServerConfig}};
 
 use hyper_util::{
     rt::{TokioExecutor, TokioIo},
@@ -41,31 +41,39 @@ pub fn new(ctx: Arc<Context>) -> Self {
         let port = port.unwrap_or(8080);
         let timeout = timeout.unwrap_or(6);
 
-        let service = TowerToHyperService::new(StreamableHttpService::new(
-            || Ok(GolemCliMcpServer::new()),
-            LocalSessionManager::default().into(),
-            StreamableHttpServerConfig {
-                sse_keep_alive: Some(Duration::new(timeout, 0)),
-                ..Default::default()
-            },
-        ));
-        let listener = tokio::net::TcpListener::bind(format!("[::1]:{}", port)).await?;
-        loop {
-            let io = tokio::select! {
-                _ = tokio::signal::ctrl_c() => break,
-                accept = listener.accept() => {
-                    TokioIo::new(accept?.0)
-                }
-            };
-            let service = service.clone();
-            tokio::spawn(async move {
-                let _result = Builder::new(TokioExecutor::default())
-                    .serve_connection(io, service)
-                    .await;
-            });
-        }
+        // let service = TowerToHyperService::new(StreamableHttpService::new(
+        //     || Ok(GolemCliMcpServer::new()),
+        //     LocalSessionManager::default().into(),
+        //     StreamableHttpServerConfig {
+        //         sse_keep_alive: Some(Duration::new(timeout, 0)),
+        //         ..Default::default()
+        //     },
+        // ));
+        // let listener = tokio::net::TcpListener::bind(format!("[::1]:{}", port)).await?;
+        // loop {
+        //     let io = tokio::select! {
+        //         _ = tokio::signal::ctrl_c() => break,
+        //         accept = listener.accept() => {
+        //             TokioIo::new(accept?.0)
+        //         }
+        //     };
+        //     let service = service.clone();
+        //     tokio::spawn(async move {
+        //         let _result = Builder::new(TokioExecutor::default())
+        //             .serve_connection(io, service)
+        //             .await;
+        //     });
+        // }
 
-        Ok(())
+        // Ok(())
+
+        let ct = SseServer::serve(format!("127.0.0.1:{}", port).parse()?)
+        .await?
+        .with_service_directly(GolemCliMcpServer::new);
+
+    tokio::signal::ctrl_c().await?;
+    ct.cancel();
+    Ok(())
     }
 }
 
