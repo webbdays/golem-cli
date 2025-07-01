@@ -131,7 +131,7 @@ impl<Hooks: CommandHandlerHooks + 'static> CommandHandler<Hooks> {
     }
 
     #[cfg(feature = "server-commands")]
-    fn start_local_server_hook(
+    pub fn start_local_server_hook(
         yes: Arc<tokio::sync::RwLock<bool>>,
     ) -> Box<dyn Fn() -> BoxFuture<'static, anyhow::Result<()>> + Send + Sync> {
         Box::new(move || {
@@ -511,7 +511,7 @@ impl Handlers for Arc<Context> {
     }
 
     fn mcp_server_handler(&self) -> McpServerCommandHandler {
-        McpServerCommandHandler::new()
+        McpServerCommandHandler::new(self.clone())
     }
 }
 

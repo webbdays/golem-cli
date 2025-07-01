@@ -1,6 +1,6 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
-use crate::command::mcp_server::McpServerSubcommand;
+use crate::{command::mcp_server::McpServerSubcommand, context::Context};
 
 use rmcp::{handler::server::tool::ToolRouter, transport::StreamableHttpServerConfig};
 
@@ -16,17 +16,13 @@ use rmcp::transport::streamable_http_server::{
 mod handler;
 mod tools;
 
-pub struct McpServerCommandHandler {}
-
-impl Default for McpServerCommandHandler {
-    fn default() -> Self {
-        Self::new()
-    }
+pub struct McpServerCommandHandler {
+    _ctx: Arc<Context>,
 }
 
 impl McpServerCommandHandler {
-    pub fn new() -> Self {
-        Self {}
+pub fn new(ctx: Arc<Context>) -> Self {
+        Self { _ctx: ctx }
     }
 
     pub async fn handle_command(&self, subcommand: McpServerSubcommand) -> anyhow::Result<()> {
@@ -86,14 +82,14 @@ impl GolemCliMcpServer {
                 + self::GolemCliMcpServer::tool_router_api()
                 + self::GolemCliMcpServer::tool_router_api_definition()
                 + self::GolemCliMcpServer::tool_router_api_deployment()
-                + self::GolemCliMcpServer::tool_router_api_security_scheme()
-                + self::GolemCliMcpServer::tool_router_api_cloud_certificate()
+                // + self::GolemCliMcpServer::tool_router_api_security_scheme()
+                // + self::GolemCliMcpServer::tool_router_api_cloud_certificate()
                 + self::GolemCliMcpServer::tool_router_api_cloud_domain()
                 + self::GolemCliMcpServer::tool_router_cloud_account()
                 + self::GolemCliMcpServer::tool_router_cloud_account_grant()
                 + self::GolemCliMcpServer::tool_router_cloud_project_plugin()
                 + self::GolemCliMcpServer::tool_router_cloud_project_policy()
-                + self::GolemCliMcpServer::tool_router_cloud_token()
+                // + self::GolemCliMcpServer::tool_router_cloud_token()
                 + self::GolemCliMcpServer::tool_router_plugin()
                 + self::GolemCliMcpServer::tool_router_profile()
                 + self::GolemCliMcpServer::tool_router_profile_config()

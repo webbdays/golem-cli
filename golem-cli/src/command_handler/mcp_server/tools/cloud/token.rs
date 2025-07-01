@@ -7,7 +7,7 @@ use chrono::{DateTime, Utc};
 use console::strip_ansi_codes;
 use rmcp::handler::server::tool::Parameters;
 use rmcp::model::{CallToolResult, Content};
-use rmcp::{schemars, tool, tool_router, Error as CallToolError, Peer, RoleServer};
+use rmcp::{schemars, tool, Error as CallToolError, Peer, RoleServer};
 use serde::{Deserialize, Serialize};
 use std::future::Future;
 use std::sync::Arc;
@@ -31,7 +31,8 @@ pub struct Delete {
     token_id: TokenId,
 }
 
-#[tool_router(router= tool_router_cloud_token, vis="pub")]
+// #[tool_router(router= tool_router_cloud_token, vis="pub")]
+// diable for mcp for now
 impl GolemCliMcpServer {
     #[tool(name = "create_new_token", description = "Create new token")]
     pub async fn create_new_token(

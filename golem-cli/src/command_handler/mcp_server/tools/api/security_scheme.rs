@@ -7,7 +7,7 @@ use crate::model::api::IdentityProviderType;
 use console::strip_ansi_codes;
 use rmcp::handler::server::tool::Parameters;
 use rmcp::model::{CallToolResult, Content};
-use rmcp::{schemars, tool, tool_router, Error as CallToolError, Peer, RoleServer};
+use rmcp::{schemars, tool, Error as CallToolError, Peer, RoleServer};
 use serde::{Deserialize, Serialize};
 use std::future::Future;
 use std::sync::Arc;
@@ -38,7 +38,7 @@ pub struct Get {
     security_scheme_id: String,
 }
 
-#[tool_router(router= tool_router_api_security_scheme, vis="pub")]
+// #[tool_router(router= tool_router_api_security_scheme, vis="pub")] // disabled
 impl GolemCliMcpServer {
     #[tool(name = "get_api_security_scheme", description = "Get API security")]
     pub async fn get_api_security_scheme(

@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::future::Future;
 use std::sync::Arc;
 use url::Url;
-use uuid::Uuid;
+// use uuid::Uuid;
 
 pub mod config;
 
@@ -35,8 +35,9 @@ pub struct New {
     /// Default output format
     default_format: Format,
     /// Token to use for authenticating against Golem. If not provided an OAuth2 flow will be performed when authentication is needed for the first time.
-    #[schemars(with = "String")]
-    static_token: Option<Uuid>,
+    // #[schemars(with = "String")]
+    // static_token: Option<Uuid>, disabled
+
     /// Accept invalid certificates.
     ///
     /// Disables certificate validation.
@@ -105,7 +106,7 @@ impl GolemCliMcpServer {
                     req.cloud_url,
                     req.default_format,
                     req.allow_insecure,
-                    req.static_token,
+                    None // req.static_token, not good to allow in mcp, so oauth flow will take place
                 ) {
                     Ok(_) => Ok(CallToolResult {
                         content: vec![Content::text("Success")],

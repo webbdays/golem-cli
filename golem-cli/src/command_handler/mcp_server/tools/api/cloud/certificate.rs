@@ -7,7 +7,7 @@ use crate::model::PathBufOrStdin;
 use console::strip_ansi_codes;
 use rmcp::handler::server::tool::Parameters;
 use rmcp::model::{CallToolResult, Content};
-use rmcp::{schemars, tool, tool_router, Error as CallToolError, Peer, RoleServer};
+use rmcp::{schemars, tool, Error as CallToolError, Peer, RoleServer};
 use serde::{Deserialize, Serialize};
 use std::future::Future;
 use std::sync::Arc;
@@ -43,7 +43,7 @@ pub struct Delete {
     certificate_id: Uuid,
 }
 
-#[tool_router(router= tool_router_api_cloud_certificate, vis="pub")]
+// #[tool_router(router= tool_router_api_cloud_certificate, vis="pub")] // disabled
 impl GolemCliMcpServer {
     #[tool(
         name = "get_certificate",
