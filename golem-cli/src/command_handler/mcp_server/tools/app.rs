@@ -21,7 +21,6 @@ pub struct New {
     /// Application folder name where the new application should be created
     application_name: String,
     /// Languages that the application should support, default langauge : rust
-    #[schemars(default="default_guest_language")]
     language: Vec<GuestLanguage>,
 }
 
